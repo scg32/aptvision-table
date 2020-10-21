@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-md">
     <q-dialog
-      v-model="showDialog"
+      :value="showDialog"
       transition-show="rotate"
       transition-hide="rotate"
       @escape-key="showDialog = false"
@@ -16,7 +16,7 @@
             :false-value="Number(0)"
             :true-value="Number(1)"
             v-model="getFormModel.is_active"
-          />
+          ></q-toggle>
         </q-toolbar>
         <q-card-section>
           <q-form>
@@ -84,15 +84,12 @@
 
             <div class="row q-col-gutter-xs q-mb-sm">
               <div class="col-4">
-                <q-select
-                  filled
-                  v-model="getFormModel.require_contrast"
-                  :options="switcher"
-                  option-value="value"
-                  option-label="name"
-                  emit-value
+                <q-toggle
                   label="Required contrast"
-                ></q-select>
+                  :false-value="Number(0)"
+                  :true-value="Number(1)"
+                  v-model="getFormModel.require_contrast"
+                />
               </div>
               <div class="col-4">
                 <q-input
@@ -108,6 +105,66 @@
                   v-model="getFormModel.drl"
                   label="DRL"
                 ></q-input>
+              </div>
+            </div>
+            <div class="row q-col-gutter-xs q-mb-sm">
+              <div class="col-6">
+                <div class="q-pa-md">
+                  <q-card>
+                    <q-card-section>
+                      Description
+                    </q-card-section>
+                    <q-card-section>
+                      <q-input
+                        dense
+                        outlined
+                        v-model="description.title"
+                        label="Title"
+                      ></q-input>
+
+                      <q-input
+                        dense
+                        outlined
+                        v-model="description.value"
+                        label="Value"
+                      ></q-input>
+                    </q-card-section>
+                    <q-card-actions>
+                      <q-btn
+                        label="Add"
+                        color="primary"
+                        @click="addDescription()"
+                      ></q-btn>
+                      <q-space></q-space>
+                      <q-btn
+                        color="grey"
+                        round
+                        flat
+                        dense
+                        :icon="
+                          expandedDesc
+                            ? 'keyboard_arrow_up'
+                            : 'keyboard_arrow_down'
+                        "
+                        @click="expandedDesc = !expandedDesc"
+                      ></q-btn>
+                    </q-card-actions>
+                    <q-slide-transition>
+                      <div v-show="expandedDesc">
+                        <q-card-section class="text-subitle2">
+                          <div
+                            v-for="(desc, index) in getFormModel.description"
+                            :key="index"
+                          >
+                            <p v-if="desc.title && desc.value">
+                              <span>{{ `${desc.title}:${desc.value}` }}</span>
+                            </p>
+                          </div>
+                        </q-card-section>
+                      </div>
+                    </q-slide-transition>
+                  </q-card>
+                </div>
               </div>
             </div>
           </q-form>
@@ -131,7 +188,8 @@
   </div>
 </template>
 <script>
-import { numericArray, switcher } from "src/components/tableComponentConfig.js";
+import { numericArray } from "src/components/tableComponentConfig.js";
+
 export default {
   name: "DialogForm",
   data() {
@@ -139,20 +197,28 @@ export default {
       loading: false,
       show: false,
       numericArray: numericArray,
-      switcher: switcher
+      description: { title: "", value: "" },
+      formModel: null,
+      expandedDesc: false
     };
   },
 
   props: {
     showDialog: { type: Boolean, default: false },
-    rowModel: { type: Object, default: null }
+
+    rowModelProps: { type: Object, default: () => {} }
+  },
+  watch: {
+    getFormModel: {
+      deep: true,
+      handler(n, o) {
+        //console.log("dataTable -> n,o", n, o);
+      }
+    }
   },
   computed: {
-    getFormModel() {
-      if (this.rowModel) {
-        return this.rowModel;
-      }
-      return {};
+    getFormModel: function() {
+      return this.rowModelProps;
     },
     getDialog: {
       get: function() {
@@ -165,11 +231,14 @@ export default {
     }
   },
   methods: {
+    addDescription() {
+      this.getFormModel.description.push(this.description);
+    },
     saveForm() {
       this.loading = true;
       setTimeout(() => {
         this.loading = false;
-        this.$emit("save-model", this.getFormModel);
+        this.$emit("save-model");
         this.$emit("close-dialog");
       }, 2000);
     }

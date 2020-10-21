@@ -12,7 +12,7 @@ export const dataTable = [
     standard_views_json: "",
     additional_views_json: "",
     comment: "test comment",
-    description: "",
+    description: [{ title: null, value: null }],
     require_contrast: 0,
     contrast_administration: "any text ",
     drl: "any text"
@@ -30,7 +30,7 @@ export const dataTable = [
     standard_views_json: "",
     additional_views_json: "",
     comment: "test comment",
-    description: "",
+    description: [{ title: null, value: null }],
     require_contrast: 0,
     contrast_administration: "any text ",
     drl: "any text"
@@ -48,7 +48,7 @@ export const dataTable = [
     standard_views_json: "",
     additional_views_json: "",
     comment: "test comment",
-    description: "",
+    description: [{ title: null, value: null }],
     require_contrast: 0,
     contrast_administration: "any text ",
     drl: "any text"

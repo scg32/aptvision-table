@@ -39,14 +39,30 @@
           <span>{{ `${props.row.is_active === 0 ? "No" : "Yes"}` }}</span>
         </q-td>
       </template>
+      <template v-slot:body-cell-require_contrast="props">
+        <q-td :props="props">
+          <span>{{
+            `${props.row.require_contrast === 0 ? "No" : "Yes"}`
+          }}</span>
+        </q-td>
+      </template>
+      <template v-slot:body-cell-description="props">
+        <q-td :props="props">
+          <div v-for="(desc, index) in props.row.description" :key="index">
+            <p v-if="desc.title && desc.value">
+              <span>{{ `${desc.title}:${desc.value}` }}</span>
+            </p>
+          </div>
+        </q-td>
+      </template>
     </q-table>
 
-    <DialogForm
-      :rowModel="rowModel"
+    <dialog-form
+      :rowModelProps="rowModel"
       :showDialog="showDialog"
       @close-dialog="closeDialog"
       @save-model="saveModel"
-    ></DialogForm>
+    ></dialog-form>
   </div>
 </template>
 
@@ -57,10 +73,11 @@ import {
 } from "src/components/tableComponentConfig.js";
 import { dataTable } from "src/components/tableData.js";
 import DialogForm from "src/components/DialogForm.vue";
+
 export default {
   name: "TableComponent",
   components: {
-    DialogForm
+    "dialog-form": DialogForm
   },
 
   data() {
@@ -68,40 +85,39 @@ export default {
       columns: columns,
       visibleColumns: columnsVisible,
       showDialog: false,
-      rowModel: null,
+      rowModel: {},
+      setData: dataTable,
       render: true
     };
   },
 
   computed: {
     getData() {
-      return this.data;
+      return this.setData;
     }
   },
 
   methods: {
-    openDialog(rowData) {
-      this.rowModel = rowData;
+    openDialog(row) {
+      this.rowModel = row;
+
       this.showDialog = true;
     },
     closeDialog() {
       this.showDialog = false;
+      this.getData;
     },
-    saveModel(modelToSave) {
-      const found = this.data.find(
-        dataFind => dataFind.protocol_id === modelToSave.protocol_id
-      );
-      if (typeof found !== "undefined") {
-        Object.assign(found, modelToSave);
-        this.render = false;
-        this.$nextTick(() => {
-          this.render = true;
-        });
-      }
+    saveModel() {
+      // setData.filter(dataFind => {
+      //   if (dataFind.protocol_id === this.rowModel.protocol_id) {
+      //     dataFind = this.rowModel;
+      //   }
+      // });
+      this.render = false;
+      this.$nextTick(() => {
+        this.render = true;
+      });
     }
-  },
-  created() {
-    this.data = dataTable;
   }
 };
 </script>
